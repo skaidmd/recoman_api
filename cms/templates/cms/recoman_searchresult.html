@@ -1,0 +1,15 @@
+{% extends "cms/base.html" %}
+
+{% block title %}recoman_searchresult{% endblock title %}
+
+{% block content %}
+    <h4 class="mt-4 border-bottom text-center">recoman_searchresult</h4>
+      <tbody>
+        <tr>
+            {% for result in rankl %}
+                <div>{{result}}</div>
+            {% endfor %}
+        </tr>
+         <a href="{% url 'cms:recoman_top'  %}" class="btn btn-outline-primary btn-sm">戻る</a>
+      </tbody>
+{% endblock content %}

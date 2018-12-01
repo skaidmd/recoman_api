@@ -1,0 +1,34 @@
+{% extends "cms/base.html" %}
+
+{% block title %}recoman_top{% endblock title %}
+
+{% block content %}
+    <h4 class="mt-4 border-bottom text-center">recoman_top</h4>
+{#    <a href="{% url 'cms:book_add' %}" class="btn btn-primary btn-sm my-3">追加</a>#}
+{#    <table class="table table-striped table-bordered">#}
+{#      <thead>#}
+{#        <tr>#}
+{#          <th scope="col">ID</th>#}
+{#          <th scope="col">書籍名</th>#}
+{#          <th scope="col">出版社</th>#}
+{#          <th scope="col">ページ数</th>#}
+{#          <th scope="col">操作</th>#}
+{#        </tr>#}
+{#      </thead>#}
+      <tbody>
+{#        {% for book in books %}#}
+        <tr>
+{#          <th scope="row">{{ book.id }}</th>#}
+{#          <td>{{ book.name }}</td>#}
+{#          <td>{{ book.publisher }}</td>#}
+{#          <td>{{ book.page }}</td>#}
+          <td>
+{#            <a class="text-lg-left">ユーザー名:{{username}}</a>#}
+            <a href="{% url 'cms:recoman_search'  %}" class="btn btn-outline-primary btn-lg btn-block">おすすめ漫画を探す</a>
+            <a href="{% url 'cms:recoman_history' %}" class="btn btn-outline-success btn-lg btn-block">過去のレコメンド結果を見る</a>
+          </td>
+        </tr>
+{#        {% endfor %}#}
+      </tbody>
+{#    </table>#}
+{% endblock content %}

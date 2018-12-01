@@ -1,0 +1,33 @@
+{% extends "cms/base.html" %}
+
+{% block title %}recoman_search{% endblock title %}
+
+{% block content %}
+    <h4 class="mt-4 border-bottom text-center">recoman_search</h4>
+    <label for="select_manga">漫画の設定</label>
+      <body>
+{#        <tr>#}
+{#            <form>#}
+{#                <div class="form-select_manga">#}
+{#                    <input type="text" class="form-control" id="Sereis1" placeholder="好きな漫画１">#}
+{#                    <input type="text" class="form-control" id="Sereis2" placeholder="好きな漫画２">#}
+{#                    <input type="text" class="form-control" id="Sereis3" placeholder="好きな漫画３">#}
+{#                    <input type="text" class="form-control" id="Sereis4" placeholder="好きな漫画４">#}
+{#                    <input type="text" class="form-control" id="Sereis5" placeholder="好きな漫画５">#}
+{#                </div>#}
+{#            </form>#}
+{#            <td>#}
+{#                <form action="" method="post">#}
+{#                    <input type="submit" value="レコメンドを確認">#}
+{#                </form>#}
+{#                <a href="{% url 'cms:recoman_top'  %}" class="btn btn-outline-primary btn-sm">戻る</a>#}
+{#            </td>#}
+{#        </tr>#}
+        <form action="{% url 'cms:recoman_searchresult'  %}" method="POST">
+            {% csrf_token %}
+
+            <div>{{ form }}</div>
+            <input type="submit" value="送信"/>
+        </form>
+      </body>
+{% endblock content %}
