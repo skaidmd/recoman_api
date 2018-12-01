@@ -1,3 +1,6 @@
+import json
+
+from django.http import HttpResponse
 from django.shortcuts import render
 from .forms import select_manga
 import numpy as np
@@ -6,6 +9,25 @@ import sys
 sys.path.append("/Users/skai/PycharmProjects/recoman/cms")
 
 import boklog_content_v2,title_cleansing
+
+def render_json_response(request, data, status=None):
+    """response を JSON で返却"""
+    json_str = json.dumps(data, ensure_ascii=False, indent=2)
+    callback = request.GET.get('callback')
+    if not callback:
+        callback = request.POST.get('callback')  # POSTでJSONPの場合
+    if callback:
+        json_str = "%s(%s)" % (callback, json_str)
+        response = HttpResponse(json_str, content_type='application/javascript; charset=UTF-8', status=status)
+    else:
+        response = HttpResponse(json_str, content_type='application/json; charset=UTF-8', status=status)
+    return response
+
+def analyze(request):
+    """analyze"""
+    data = {'進撃': [1,2,3], 'k2': 2, 'k3': 3}
+    return render_json_response(request, data)
+
 
 def recoman_top(request):
     """recoman_top"""

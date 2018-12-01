@@ -9,4 +9,5 @@ urlpatterns = [
     path('recoman_top/search', views.recoman_search, name='recoman_search'),  # search
     path('recoman_top/searchresult', views.recoman_searchresult, name='recoman_searchresult'),  # searchresult
     path('recoman_top/history', views.recoman_history, name='recoman_history'),  # history
+    path('api/analyze', views.analyze, name='analyze'),  # analyze
 ]
