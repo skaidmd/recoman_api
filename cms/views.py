@@ -56,6 +56,9 @@ def analyze(request):
     for i in values["series"]:
         lovetitles.append([values["name"], i, values["series"][i]])
 
+    print(lovetitles)
+
+
     # lovetitlel = [
     #     ['kensusan', 'G戦場ヘヴンズドア', 5],
     #     ['kensusan', '沈黙の艦隊', 4],
@@ -88,6 +91,7 @@ def analyze(request):
         # 評価
         rank = boklog_content_v2.recomend(username, 20, df_pivot)
 
+
         rankl = []
         num = 20
         cnt = 0
@@ -100,6 +104,9 @@ def analyze(request):
                 continue
 
         rank_dic = dict(rankl)
+
+        if len(rank_dic)==0:
+            rank_dic='該当者なし'
 
         return render_json_response(request, rank_dic)
 
