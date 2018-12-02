@@ -43,7 +43,7 @@ def target_add(lovetitlel):
     df_dummy['categoryId'] = ''
 
     # ログデータの読み込み
-    df_Alllog = pd.read_csv('/Users/skai/PycharmProjects/recoman/cms/load_log.csv')
+    df_Alllog = pd.read_csv('/Users/skai/PycharmProjects/recoman_api/cms/load_log.csv')
 
     # dummy追加
     df_Alllog = pd.concat([df_Alllog, df_dummy], axis=0)

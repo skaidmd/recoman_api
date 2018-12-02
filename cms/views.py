@@ -1,17 +1,14 @@
 import json
-
-from django.http import HttpResponse
-from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
-
-from .forms import select_manga
-import numpy as np
-
 import sys
 
-sys.path.append("/Users/skai/PycharmProjects/recoman/cms")
+sys.path.append("/Users/skai/PycharmProjects/recoman_api/cms")
 
-import boklog_content_v2, title_cleansing
+import numpy as np
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+
+import title_cleansing
+import boklog_content_v2
 
 
 def render_json_response(request, data, status=None):
@@ -56,18 +53,6 @@ def analyze(request):
     for i in values["series"]:
         lovetitles.append([values["name"], i, values["series"][i]])
 
-    print(lovetitles)
-
-
-    # lovetitlel = [
-    #     ['kensusan', 'G戦場ヘヴンズドア', 5],
-    #     ['kensusan', '沈黙の艦隊', 4],
-    #     ['kensusan', 'からかい上手の高木さん', 4],
-    #     ['kensusan', '進撃の巨人', 5],
-    #     ['kensusan', 'HUNTER X HUNTER', 5],
-    #     ['kensusan', 'カジュアル面談大好きっ子', 5]
-    # ]
-
     # データ追加
     # 選択データDB格納
 
@@ -77,6 +62,8 @@ def analyze(request):
         df_Alllog = boklog_content_v2.target_add(lovetitles)
         # タイトル情報からシリーズ情報を加工
         # ユーザーシリーズデータの加工
+        print(lovetitles)
+
         df_Alllog['series'] = title_cleansing.series_ext(df_Alllog['title'])
 
         # ログをグループ化して集計
@@ -86,11 +73,10 @@ def analyze(request):
 
         # マスタデータピボット化
         df_pivot = df_logcust.pivot(index='booklogUserId', columns='series', values='rv_max').fillna(0)
-        df_pivot = df_pivot.reset_index(drop=False)
+       df_pivot = df_pivot.reset_index(drop=False)
 
         # 評価
         rank = boklog_content_v2.recomend(username, 20, df_pivot)
-
 
         rankl = []
         num = 20
@@ -105,8 +91,8 @@ def analyze(request):
 
         rank_dic = dict(rankl)
 
-        if len(rank_dic)==0:
-            rank_dic='該当者なし'
+        if len(rank_dic) == 0:
+            rank_dic = '該当者なし'
 
         return render_json_response(request, rank_dic)
 
