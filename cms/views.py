@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 import title_cleansing
 import boklog_content_v2
+import urllib.parse
 
 
 def render_json_response(request, data, status=None):
@@ -46,7 +47,10 @@ def render_json_response(request, data, status=None):
 def analyze(request):
     """analyze"""
     # 受け取ったPOSTデータ
-    values = json.loads(request.body)
+    # 受け取り後にdecodeかけてjsonをparse
+    parsed = urllib.parse.unquote(request.body.decode('utf-8'))
+    values = json.loads(parsed)
+    print(3,values)
 
     lovetitles = []
 
@@ -62,7 +66,6 @@ def analyze(request):
         df_Alllog = boklog_content_v2.target_add(lovetitles)
         # タイトル情報からシリーズ情報を加工
         # ユーザーシリーズデータの加工
-        print(lovetitles)
 
         df_Alllog['series'] = title_cleansing.series_ext(df_Alllog['title'])
 
@@ -73,7 +76,7 @@ def analyze(request):
 
         # マスタデータピボット化
         df_pivot = df_logcust.pivot(index='booklogUserId', columns='series', values='rv_max').fillna(0)
-       df_pivot = df_pivot.reset_index(drop=False)
+        df_pivot = df_pivot.reset_index(drop=False)
 
         # 評価
         rank = boklog_content_v2.recomend(username, 20, df_pivot)
