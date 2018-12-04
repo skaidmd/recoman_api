@@ -1,17 +1,17 @@
-import json,re
+import json, re
 import pandas as pd
 import numpy as np
 
 import unicodedata
 
-#from scipy.sparse import csr_matrix
-#from sklearn.neighbors import NearestNeighbors
+
+# from scipy.sparse import csr_matrix
+# from sklearn.neighbors import NearestNeighbors
 
 # jsonデータから読み込み
-#ページに到達した時点で裏で最新のjsonファイルから構築する
+# ページに到達した時点で裏で最新のjsonファイルから構築する
 
 def load_log(json_path):
-
     json_path = '/Users/skai/python_sample/alu_test_anly/input/booklog_data.json'
 
     r = open(json_path, 'r')
@@ -26,7 +26,8 @@ def load_log(json_path):
     df_Alllog = pd.DataFrame(alllog, columns=['booklogUserId', 'title', 'reviewScore', 'authors', 'categoryId'])
 
     # 'booklogUserId','title',で重複する行をSoreの高い方を残して削除
-    df_Alllog.sort_values(by=['booklogUserId', 'title', 'reviewScore'], ascending=['True', 'True', 'False'],inplace=True)
+    df_Alllog.sort_values(by=['booklogUserId', 'title', 'reviewScore'], ascending=['True', 'True', 'False'],
+                          inplace=True)
     df_Alllog.drop_duplicates(keep='first', subset=['booklogUserId', 'title'], inplace=True)
 
     df_Alllog.to_csv('/Users/skai/PycharmProjects/recoman/cms/load_log.csv')
@@ -58,15 +59,21 @@ def target_add(lovetitlel):
 #########################
 
 
-def similarities_search(scores, target,target_user_index):
+def similarities_search(scores, target, target_user_index):
     """
-    tgユーザーに対して、共通の評価が少ないデータを場合を除外すべく、
+
+    scores:pivot のデータ部
+    target:対象ユーザーの評価値
+    target_user_index:ユーザーのインデックス番号
+
+    tgユーザーに対して、共通の評価が少ないデータを除外すべく、
     対象データの評価値と全データの評価値を掛け合わせ、
     結果が全て０（同タイトルを評価していない）ではないデータを対象とする
     """
     similarities = []
 
     for i, score in enumerate(scores):
+
         indices = np.where(np.array(target) * np.array(score) != 0)[0]
 
         # 共通評価シリーズが１件以上、tg自身ではないことを判断
@@ -118,14 +125,13 @@ def predict(scores, similarities, target_user_index, target_item_index):
             numerator += similar[1] * (score[target_item_index] - np.mean(score[np.where(score >= 0)]))
             # numerator += score[target_item_index]   * (score[target_item_index] - np.mean(score[np.where(score >= 0)]))
             k += 1
-            # print(avg_target + (numerator / denominator) )
 
     return avg_target + (numerator / denominator) if denominator > 0 else -1
 
 
 ###targetUserIdを指定してレコメンド情報を提供
 
-def rank_items(scores, similarities, target,target_user_index):
+def rank_items(scores, similarities, target, target_user_index):
     rankings = []
     # 評価タイトル全て
     for i in range(len(target)):
@@ -138,8 +144,9 @@ def rank_items(scores, similarities, target,target_user_index):
     return sorted(rankings, key=lambda r: r[1], reverse=True)
 
 
-def recomend(targetUserId,num,df_pivot):
+def recomend(targetUserId, num, df_pivot):
     ##対象ユーザー名からpivotのインデックス設定
+
     target_user_index = df_pivot[df_pivot['booklogUserId'] == targetUserId].index[0]
 
     # 全pivotデータの評価値のみリスト
@@ -151,8 +158,8 @@ def recomend(targetUserId,num,df_pivot):
     # 類似ユーザーのIDリスト
     global similarities
 
-    similarities = similarities_search(scores, target,target_user_index)
+    similarities = similarities_search(scores, target, target_user_index)
 
-    rank = rank_items(scores, similarities, target,target_user_index)
+    rank = rank_items(scores, similarities, target, target_user_index)
 
     return rank
