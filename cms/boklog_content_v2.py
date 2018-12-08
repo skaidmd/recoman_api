@@ -11,47 +11,47 @@ import unicodedata
 # jsonデータから読み込み
 # ページに到達した時点で裏で最新のjsonファイルから構築する
 
-def load_log(json_path):
-    json_path = '/Users/skai/python_sample/alu_test_anly/input/booklog_data.json'
-
-    r = open(json_path, 'r')
-    alujson = json.load(r)
-
-    alllog = []
-
-    for i in alujson['data']:
-        for j in i['reviews']:
-            alllog.append([j['booklogUserId'], j['title'], j['reviewScore'], j['authors'][0], j['categoryId']])
-
-    df_Alllog = pd.DataFrame(alllog, columns=['booklogUserId', 'title', 'reviewScore', 'authors', 'categoryId'])
-
-    # 'booklogUserId','title',で重複する行をSoreの高い方を残して削除
-    df_Alllog.sort_values(by=['booklogUserId', 'title', 'reviewScore'], ascending=['True', 'True', 'False'],
-                          inplace=True)
-    df_Alllog.drop_duplicates(keep='first', subset=['booklogUserId', 'title'], inplace=True)
-
-    df_Alllog.to_csv('/Users/skai/PycharmProjects/recoman/cms/load_log.csv')
+# def load_log(json_path):
+#     json_path = '/Users/skai/python_sample/alu_test_anly/input/booklog_data.json'
+#
+#     r = open(json_path, 'r')
+#     alujson = json.load(r)
+#
+#     alllog = []
+#
+#     for i in alujson['data']:
+#         for j in i['reviews']:
+#             alllog.append([j['booklogUserId'], j['title'], j['reviewScore'], j['authors'][0], j['categoryId']])
+#
+#     df_Alllog = pd.DataFrame(alllog, columns=['booklogUserId', 'title', 'reviewScore', 'authors', 'categoryId'])
+#
+#     # 'booklogUserId','title',で重複する行をSoreの高い方を残して削除
+#     df_Alllog.sort_values(by=['booklogUserId', 'title', 'reviewScore'], ascending=['True', 'True', 'False'],
+#                           inplace=True)
+#     df_Alllog.drop_duplicates(keep='first', subset=['booklogUserId', 'title'], inplace=True)
+#
+#     df_Alllog.to_csv('/Users/skai/PycharmProjects/recoman/cms/load_log.csv')
 
 
 # データ追加
-def target_add(lovetitlel):
-    # ユーザー、好きなタイトル
-
-    df_dummy = pd.DataFrame(lovetitlel)
-    df_dummy.columns = ['booklogUserId', 'title', 'reviewScore']
-
-    df_dummy['authors'] = ''
-    df_dummy['categoryId'] = ''
-
-    # ログデータの読み込み
-    df_Alllog = pd.read_csv('/Users/skai/PycharmProjects/recoman_api/cms/load_log.csv')
-
-    # dummy追加
-    df_Alllog = pd.concat([df_Alllog, df_dummy], axis=0)
-
-    df_Alllog['reviewScore'] = df_Alllog['reviewScore'].astype(int)
-
-    return df_Alllog
+# def target_add(lovetitlel):
+#     # ユーザー、好きなタイトル
+#
+#     df_dummy = pd.DataFrame(lovetitlel)
+#     df_dummy.columns = ['booklogUserId', 'title', 'reviewScore']
+#
+#     df_dummy['authors'] = ''
+#     df_dummy['categoryId'] = ''
+#
+#     # ログデータの読み込み
+#     df_Alllog = pd.read_csv('/Users/skai/PycharmProjects/recoman_api/cms/load_log.csv')
+#
+#     # dummy追加
+#     df_Alllog = pd.concat([df_Alllog, df_dummy], axis=0)
+#
+#     df_Alllog['reviewScore'] = df_Alllog['reviewScore'].astype(int)
+#
+#     return df_Alllog
 
 
 #########################
@@ -125,6 +125,7 @@ def predict(scores, similarities, target_user_index, target_item_index):
             numerator += similar[1] * (score[target_item_index] - np.mean(score[np.where(score >= 0)]))
             # numerator += score[target_item_index]   * (score[target_item_index] - np.mean(score[np.where(score >= 0)]))
             k += 1
+            # print(avg_target + (numerator / denominator) )
 
     return avg_target + (numerator / denominator) if denominator > 0 else -1
 
