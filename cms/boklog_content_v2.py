@@ -73,7 +73,6 @@ def similarities_search(scores, target, target_user_index):
     similarities = []
 
     for i, score in enumerate(scores):
-
         indices = np.where(np.array(target) * np.array(score) != 0)[0]
 
         # 共通評価シリーズが１件以上、tg自身ではないことを判断
@@ -148,7 +147,7 @@ def rank_items(scores, similarities, target, target_user_index):
 def recomend(targetUserId, num, df_pivot):
     ##対象ユーザー名からpivotのインデックス設定
 
-    target_user_index = df_pivot[df_pivot['booklogUserId'] == targetUserId].index[0]
+    target_user_index = df_pivot[df_pivot['userid'] == targetUserId].index[0]
 
     # 全pivotデータの評価値のみリスト
     scores = np.array(df_pivot.iloc[0:, 1:].values.tolist())

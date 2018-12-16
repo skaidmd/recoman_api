@@ -1,6 +1,7 @@
 import json
 import sys
 import pandas as pd
+import pymysql
 
 sys.path.append("/Users/skai/PycharmProjects/recoman_api/cms")
 
@@ -8,6 +9,7 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import boklog_content_v2
 import urllib.parse
+
 
 def render_json_response(request, data, status=None):
     """response を JSON で返却"""
@@ -33,44 +35,53 @@ def analyze(request):
 
     lovetitles = []
 
-
     for i in values["series"]:
         lovetitles.append([values["name"], i, values["series"][i]])
 
-    print(lovetitles)
     # データ追加
     # 選択データDB格納
     username = lovetitles[0][0]
 
     try:
-        # pivot化したcsvを読み込む
-        df_pivot = pd.read_csv('./cms/booklog_recopivot.csv', index_col=0, encoding='utf-8')
+        # テーブルからデータ取得
+        # MySQLに接続、データ抽出
+        connection = pymysql.connect(host='localhost',
+                                     user='root',
+                                     password='',
+                                     db='recoman',
+                                     charset='utf8mb4',
+                                     cursorclass=pymysql.cursors.DictCursor)
+        connection.commit()
+        cur = connection.cursor()
+        cur.execute('select userid,title,evaluate  from user_evaluation')
+        rows = cur.fetchall()
+        df_logcust = pd.DataFrame(rows)
 
-        # 入力されたシリーズ名が既存ログと一致したもののみを対象にrecomendする
-        requestl = []
-        for lovetitle in lovetitles:
-            for series in df_pivot.columns.tolist():
-                if lovetitle[1] == series:
-                    requestl.append([lovetitle[0], series, lovetitle[2]])
+        # 入力データとテーブル抽出データを結合
+        df_lovetitle = pd.DataFrame(lovetitles)
+        df_lovetitle.columns = ['userid', 'title', 'evaluate']
+        df_logcust = pd.concat([df_logcust, df_lovetitle])
+        df_logcust.reset_index(drop=True, inplace=True)
+        df_logcust = df_logcust[['userid', 'title', 'evaluate']].fillna(0)
+        df_logcust = df_logcust.astype({'evaluate': 'int32'})
 
-        ##pivotへ追加する
-        columl = []
-        datel = []
+        # 重複レコードの削除
+        df_logcust.drop_duplicates(keep='first', subset=['userid', 'title'], inplace=True)
 
-        for num in range(len(requestl)):
-            columl.append(requestl[num][1])
-            datel.append(requestl[num][2])
+        # タイトル正規表現処理で欠落？レコードの削除
+        df_logcust = df_logcust[[not (i) for i in df_logcust['title'].isnull().tolist()]]
 
-        datel = list(map(int, datel))
-        datel.insert(0, requestl[0][0])
-        columl.insert(0, 'booklogUserId')
+        # 入力されたシリーズ名が既存ログと一致したもののみを対象に評価する
+        # requestl = []
+        # for lovetitle in lovetitles:
+        #     for series in df_pivot.columns.tolist():
+        #         if lovetitle[1] == series:
+        #             requestl.append([lovetitle[0], series, lovetitle[2]])
 
-        df_request = pd.DataFrame(data=[datel], columns=columl)
-
-        # columnの順番を変更せずにセットできる
-        df_pivot = df_pivot.append(df_request)[df_pivot.columns.tolist()]
-        df_pivot.fillna(0, inplace=True)
-        df_pivot.reset_index(drop=True, inplace=True)
+        # マトリクス形式のデータ化を行い、レコメンドデータを作成
+        # ピボット化
+        df_pivot = df_logcust.pivot(index='userid', columns='title', values='evaluate').fillna(0)
+        df_pivot = df_pivot.reset_index(drop=False)
 
         # 評価
         rank = boklog_content_v2.recomend(username, 10, df_pivot)
