@@ -33,9 +33,11 @@ def analyze(request):
 
     lovetitles = []
 
+
     for i in values["series"]:
         lovetitles.append([values["name"], i, values["series"][i]])
 
+    print(lovetitles)
     # データ追加
     # 選択データDB格納
     username = lovetitles[0][0]
