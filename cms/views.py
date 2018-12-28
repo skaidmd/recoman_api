@@ -36,7 +36,8 @@ def analyze(request):
     lovetitles = []
 
     for i in values["series"]:
-        lovetitles.append([values["name"], i, values["series"][i]])
+        if values["series"][i] != "":
+            lovetitles.append([values["name"], i, values["series"][i]])
 
     # データ追加
     # 選択データDB格納
@@ -45,6 +46,7 @@ def analyze(request):
     try:
         # テーブルからデータ取得
         # MySQLに接続、データ抽出
+
         connection = pymysql.connect(host='localhost',
                                      user='root',
                                      password='',
@@ -57,6 +59,7 @@ def analyze(request):
         rows = cur.fetchall()
         df_logcust = pd.DataFrame(rows)
 
+
         # 入力データとテーブル抽出データを結合
         df_lovetitle = pd.DataFrame(lovetitles)
         df_lovetitle.columns = ['userid', 'title', 'evaluate']
@@ -64,6 +67,7 @@ def analyze(request):
         df_logcust.reset_index(drop=True, inplace=True)
         df_logcust = df_logcust[['userid', 'title', 'evaluate']].fillna(0)
         df_logcust = df_logcust.astype({'evaluate': 'int32'})
+
 
         # 重複レコードの削除
         df_logcust.drop_duplicates(keep='first', subset=['userid', 'title'], inplace=True)
@@ -80,9 +84,11 @@ def analyze(request):
 
         # マトリクス形式のデータ化を行い、レコメンドデータを作成
         # ピボット化
+
         df_pivot = df_logcust.pivot(index='userid', columns='title', values='evaluate').fillna(0)
         df_pivot = df_pivot.reset_index(drop=False)
 
+        print(3)
         # 評価
         rank = boklog_content_v2.recomend(username, 10, df_pivot)
 
