@@ -88,7 +88,6 @@ def analyze(request):
         df_pivot = df_logcust.pivot(index='userid', columns='title', values='evaluate').fillna(0)
         df_pivot = df_pivot.reset_index(drop=False)
 
-        print(3)
         # 評価
         rank = boklog_content_v2.recomend(username, 10, df_pivot)
 
